@@ -3,6 +3,8 @@ import "express-async-errors";
 import morgan from "morgan";
 import { getAll, getOneById, create, updateById, deleteById } from "./src/controllers/planets";
 
+
+
 const app = express();
 const port = 3000;
 
