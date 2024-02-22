@@ -1,51 +1,9 @@
 import { Request, Response } from "express";
 import Joi from "joi";
 import pgPromise from "pg-promise";
+import {db} from "./../db.js"
 
-const initOptions = {
-  // global event notification;
-  error: (error: any, e: any) => {
-    if (e.cn) {
-      // A connection-related error;
-      //
-      // Connections are reported back with the password hashed,
-      // for safe errors logging, without exposing passwords.
-      console.log('CN:', e.cn);
-      console.log('EVENT:', error.message || error);
-    }
-  },
-};
 
-const pgp = pgPromise(initOptions);
-
-// Utiliza la configuración de la base de datos al configurar pgp
-const databaseConfig = {
-  "host": "localhost",
-  "port": 5432,
-  "database": "postgres",
-  "user": "postgres",
-  "password": "12345", // Reemplaza con tu contraseña
-};
-
-const db = pgp(databaseConfig);
-
-const setupDb = async () => {
-  await db.none(`
-    DROP TABLE IF EXISTS planets;
-    CREATE TABLE planets (
-      id SERIAL NOT NULL PRIMARY KEY,
-      name TEXT NOT NULL
-    );
-  `);
-
-  await db.none(`INSERT INTO planets (name) VALUES ('Earth')`);
-  await db.none(`INSERT INTO planets (name) VALUES ('Mars')`);
-
-  const planets = await db.many(`SELECT * FROM planets`);
-  console.log(planets);
-};
-
-setupDb();
 
 const getAll = async (req: Request, res: Response) => {
   const planets = await db.many("SELECT * FROM planets");
