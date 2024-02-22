@@ -6,7 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc-watch --noClear -p ./tsconfig.json --outDir ./dist --onSuccess \"node ./dist/server.js\""
+    "dev": "tsc-watch -p ./tsconfig.json --noClear --outDir ./dist --onSuccess \"node ./dist/server.js\""
   },
   "dependencies": {
     "express": "^4.18.2",

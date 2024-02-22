@@ -1,6 +1,8 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import "express-async-errors";
 import morgan from "morgan";
+import multer, { Multer } from "multer"; 
+
 import {
   getAll,
   getOneById,
@@ -9,7 +11,6 @@ import {
   deleteById,
   createImage,
 } from "./src/controllers/planets";
-import multer from "multer" 
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {

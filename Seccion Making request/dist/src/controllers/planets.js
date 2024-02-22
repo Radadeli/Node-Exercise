@@ -12,19 +12,40 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createImage = exports.deleteById = exports.updateById = exports.create = exports.getOneById = exports.getAll = void 0;
-const pg_promise_1 = __importDefault(require("pg-promise"));
+exports.createImage = exports.deleteById = exports.updateById = exports.create = exports.getOneById = exports.getAll = exports.db = void 0;
 const joi_1 = __importDefault(require("joi"));
-const db = (0, pg_promise_1.default)()({
-    connectionString: "postgres:argentina@localhost:5432/prove",
-});
+const pg_promise_1 = __importDefault(require("pg-promise"));
+const initOptions = {
+    // global event notification;
+    error: (error, e) => {
+        if (e.cn) {
+            // A connection-related error;
+            //
+            // Connections are reported back with the password hashed,
+            // for safe errors logging, without exposing passwords.
+            console.log('CN:', e.cn);
+            console.log('EVENT:', error.message || error);
+        }
+    },
+};
+const pgp = (0, pg_promise_1.default)(initOptions);
+// Utiliza la configuración de la base de datos al configurar pgp
+const databaseConfig = {
+    "host": "localhost",
+    "port": 5432,
+    "database": "postgres",
+    "user": "postgres",
+    "password": "12345", // Reemplaza con tu contraseña
+};
+const db = pgp(databaseConfig);
+exports.db = db;
 const setupDb = () => __awaiter(void 0, void 0, void 0, function* () {
     yield db.none(`
-  DROP TABLE IF EXISTS planets;
-  CREATE TABLE planets (
-    id SERIAL NOT NULL PRIMARY KEY,
-    name TEXT NOT NULL
-  );
+    DROP TABLE IF EXISTS planets;
+    CREATE TABLE planets (
+      id SERIAL NOT NULL PRIMARY KEY,
+      name TEXT NOT NULL
+    );
   `);
     yield db.none(`INSERT INTO planets (name) VALUES ('Earth')`);
     yield db.none(`INSERT INTO planets (name) VALUES ('Mars')`);
@@ -51,9 +72,7 @@ const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const newPlanet = { name };
     const validNewPlanet = planetSchema.validate(newPlanet);
     if (validNewPlanet.error) {
-        return res
-            .status(400)
-            .json({ msg: validNewPlanet.error.details[0].message });
+        return res.status(400).json({ msg: validNewPlanet.error.details[0].message });
     }
     else {
         yield db.none("INSERT INTO planets (name) VALUES ($1)", newPlanet.name);
@@ -75,12 +94,12 @@ const deleteById = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.deleteById = deleteById;
 const createImage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     res.status(201).json({ msg: "Planet image uploaded successfully" });
     const { id } = req.params;
-    const fileName = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
+    // Asegúrate de que req.file esté definido antes de intentar acceder a path
+    const fileName = req.file && req.file.path;
     if (fileName) {
-        db.none(`UPDATE planets SET image=$2 WHERE id=$1`, [id, fileName]);
+        yield db.none(`UPDATE planets SET image=$2 WHERE id=$1`, [id, fileName]);
         res.status(201).json({ msg: "Planet image uploaded successfully" });
     }
     else {

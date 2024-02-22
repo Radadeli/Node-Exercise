@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 require("express-async-errors");
 const morgan_1 = __importDefault(require("morgan"));
-const planets_1 = require("./src/controllers/planets");
 const multer_1 = __importDefault(require("multer"));
+const planets_1 = require("./src/controllers/planets");
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads/");
